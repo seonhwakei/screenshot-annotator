@@ -9,10 +9,6 @@
 좌표는 프리뷰를 보고 짐작하는 대신 픽셀에서 재고, 지시선은 겹치지 않게 배선하고,
 그리기 전에 검증합니다. **Figma가 없어도 PNG로 받을 수 있습니다.**
 
-<p align="center">
-  <img src="examples/out/01-list.png" alt="목록 화면에 8개 콜아웃을 적용한 예시" width="820">
-</p>
-
 ---
 
 ## 설치
@@ -41,6 +37,102 @@ export S=/path/to/screenshot-annotator/skills/screenshot-annotator/scripts
 
 ---
 
+## 유즈케이스
+
+### 1. 화면 전체를 설명할 때
+
+짚을 요소만 골라 주시면 번호는 위치를 보고 자동으로 매깁니다.
+왼쪽 열을 위에서 아래로, 그다음 오른쪽 열을 위에서 아래로 갑니다.
+화면 구성 표를 만들 때 쓰는 방식입니다.
+
+<img src="examples/out/01-list.png" alt="한 화면에 8개 콜아웃">
+
+### 2. 절차서를 만들 때
+
+문장이 가리킨 것만 번호를 받게 할 수 있습니다.
+
+```
+캠페인(마크업)을 클릭해 캠페인 관리 화면에 진입하세요.
+새 캠페인(마크업)을 클릭해 만들기 창을 여세요.
+진행률(마크업)을 확인하세요.
+```
+
+같은 화면인데 전체 마크업이면 8개가 잡히고, 여기서는 3개만 잡힙니다.
+번호가 문장 순서를 따라야 하므로 `--keep-numbers`를 씁니다.
+
+<img src="examples/procedure/out/05-command.png" alt="문장이 지시한 3개만 마크업">
+
+### 3. 한 절차가 화면 여러 장에 걸칠 때
+
+번호를 이미지 사이로 이어서 매깁니다.
+
+```
+1. 새 캠페인(이미지1-①)을 클릭해 만들기 창을 여세요.
+2. 캠페인 이름(이미지2-②)을 입력하고 만들기(이미지2-③)를 클릭하세요.
+3. 목록에 새 캠페인(이미지3-④)이 추가되었는지 확인하세요.
+```
+
+<table>
+<tr>
+<td><img src="examples/procedure/out/06-step1.png"></td>
+<td><img src="examples/procedure/out/07-step2.png"></td>
+<td><img src="examples/procedure/out/08-step3.png"></td>
+</tr>
+<tr>
+<td align="center">이미지 1 — ①</td>
+<td align="center">이미지 2 — ② ③</td>
+<td align="center">이미지 3 — ④</td>
+</tr>
+</table>
+
+```
+STEP1|LIST |1,새 캠페인,905,69,55,28
+STEP2|MODAL|2,이름,352,223,336,28;3,만들기,613,342,76,30
+STEP3|LIST |4,추가된 행,178,228,547,38
+```
+
+### 4. 다크 UI를 설명할 때
+
+어두운 구간을 지나는 선과 박스에만 흰 테두리가 자동으로 붙습니다.
+밝은 곳에는 붙지 않으니 밝고 어두운 영역이 섞인 화면에서도 그대로 쓰시면 됩니다.
+
+<img src="examples/out/03-dark.png" alt="다크 UI에 halo가 붙은 마크업">
+
+### 5. 딤 위에 뜬 창을 설명할 때
+
+딤된 배경 때문에 창 경계를 잡기 까다로운데, `modal` 모드가 창만 정확히 집어 냅니다.
+안쪽 입력 칸은 `outline`, 채움 버튼은 `solid`로 짚습니다.
+
+<img src="examples/out/02-dialog.png" alt="딤 위의 창에 적용한 마크업">
+
+### 6. 아직 화면에 없는 것을 가리켜야 할 때
+
+저장 완료 안내처럼 조건이 맞아야 뜨는 요소는 캡처에 없습니다.
+이럴 때는 점선으로 "여기에 표시됩니다"를 나타냅니다. 실선과 구분되니 오해가 없습니다.
+
+<img src="examples/out/04-placeholder.png" alt="점선 표시 자리">
+
+### 7. Figma를 함께 쓸 때
+
+4단계까지는 똑같이 하고 그리기만 Figma로 넘깁니다. 좌표와 스타일이 같아 결과도 같습니다
+(같은 프레임을 양쪽으로 그려 비교했을 때 픽셀 차이 0.8%, 전부 안티에일리어싱이었습니다).
+
+그린 뒤 도형을 직접 옮겨 미세 조정할 수 있고 캡처를 교체해도 마크업이 남습니다.
+측정은 반드시 **Figma가 렌더한 export 위에서** 하세요. 원본으로 재면 `scaleMode: FILL`이
+잘라 낸 만큼 어긋납니다. 스니펫은 [`references/figma-plugin.md`](skills/screenshot-annotator/references/figma-plugin.md).
+
+### 8. Word 매뉴얼과 맞출 때
+
+```bash
+python3 $S/extract_docx.py manual.docx out/                  # 문서의 번호·라벨을 정답으로 읽기
+python3 $S/sync_docx.py manual.docx new.docx png/ map.json   # 렌더 결과를 문서에 반영
+```
+
+번호의 정답은 문서 쪽입니다. Word가 저장할 때마다 미디어 파일 이름을 바꾸기 때문에
+파일명 대신 **캡션 순서**로 대응시킵니다.
+
+---
+
 ## 커버리지
 
 ### 다룰 수 있는 요소
@@ -60,16 +152,16 @@ export S=/path/to/screenshot-annotator/skills/screenshot-annotator/scripts
 
 ### 표현 수준
 
-| 수준 | 언제 | PNG | Figma |
+| 수준 | 어디에 쓰이나 | PNG | Figma |
 |---|---|---|---|
-| **L1** 기본 | 요소가 화면에 다 보일 때 | O | O |
-| **L2** 다크 대응 | 다크 UI (흰 테두리 자동) | O | O |
-| **L3** 표시 자리 | 아직 화면에 없는 안내 문구 | 점선 O, 모형은 `extra.json` | O |
+| **L1** 기본 | 유즈케이스 1·2·3·5 | O | O |
+| **L2** 다크 대응 | 유즈케이스 4 | O | O |
+| **L3** 표시 자리 | 유즈케이스 6 | 점선 O, 모형은 `extra.json` | O |
 | **L4** 확대 도해 | 표 안의 작은 컨트롤 | `extra.json`의 `zoom` | O |
 | **L5** 상태 카탈로그 | 한 지점의 상태가 여러 개 | 수동 | O |
 | **L6** 조건 대조 | 빈 상태와 데이터 있는 상태 | 수동 | O |
 
-### 사용법
+### 실행
 
 작업 디렉터리에 `img/HOME.png` 한 장을 두고 다섯 단계를 돌리시면 됩니다.
 
@@ -93,75 +185,10 @@ python3 $S/build.py .                   # 번호를 고정하려면 --keep-numbe
 python3 $S/render.py . --scale 2        # -> out/HOME.png
 ```
 
-`spec.json`과 `areas.txt`의 형식은 [`examples/`](examples/)에 실제로 돌아가는 예제가 있습니다.
-그대로 복사해 실행하면 재현됩니다.
+이미지가 1040×524가 아니면 배치를 적어 주시면 됩니다. `HOME|HOME@230,60,1040,585|...`
 
-<table>
-<tr>
-<td width="50%"><img src="examples/out/02-dialog.png"><br><b>딤 위의 창</b> — <code>modal</code> <code>outline</code></td>
-<td width="50%"><img src="examples/out/03-dark.png"><br><b>다크 UI</b> — 어두운 구간에만 테두리</td>
-</tr>
-<tr>
-<td><img src="examples/out/04-placeholder.png"><br><b>표시 자리</b> — 화면에 없는 안내를 점선으로</td>
-<td><img src="examples/out/01-list.png"><br><b>목록 화면</b> — 한 화면에 다섯 모드</td>
-</tr>
-</table>
-
----
-
-## 유즈케이스
-
-### 화면 전체를 설명할 때
-
-요소를 골라 주시면 번호는 위치 기준으로 자동으로 매깁니다. 화면 구성 표를 만들 때 씁니다.
-
-### 절차서를 만들 때
-
-문장이 가리킨 것만 번호를 받게 할 수 있습니다.
-
-```
-캠페인(마크업)을 클릭해 캠페인 관리 화면에 진입하세요.
-새 캠페인(마크업)을 클릭해 만들기 창을 여세요.
-진행률(마크업)을 확인하세요.
-```
-
-전체를 마크업했다면 여덟 개가 잡혔을 화면에서 세 개만 잡습니다.
-번호가 문장 순서를 따라야 하므로 `--keep-numbers`를 씁니다.
-
-### 한 절차가 화면 여러 장에 걸칠 때
-
-번호를 이어서 매깁니다.
-
-```
-1. 새 캠페인(이미지1-①)을 클릭해 만들기 창을 여세요.
-2. 캠페인 이름(이미지2-②)을 입력하고 만들기(이미지2-③)를 클릭하세요.
-3. 목록에 새 캠페인(이미지3-④)이 추가되었는지 확인하세요.
-```
-
-```
-STEP1|LIST |1,새 캠페인,905,69,55,28
-STEP2|MODAL|2,이름,352,223,336,28;3,만들기,613,342,76,30
-STEP3|LIST |4,추가된 행,178,228,547,38
-```
-
-### Figma를 함께 쓸 때
-
-4단계까지는 똑같이 하고 그리기만 Figma로 넘깁니다. 좌표와 스타일이 같아 결과도 같습니다
-(같은 프레임을 양쪽으로 그려 비교했을 때 픽셀 차이 0.8%, 전부 안티에일리어싱이었습니다).
-
-그린 뒤 도형을 직접 옮겨 미세 조정할 수 있고 캡처를 교체해도 마크업이 남습니다.
-측정은 반드시 **Figma가 렌더한 export 위에서** 하세요. 원본으로 재면 `scaleMode: FILL`이
-잘라 낸 만큼 어긋납니다. 스니펫은 [`references/figma-plugin.md`](skills/screenshot-annotator/references/figma-plugin.md).
-
-### Word 매뉴얼과 맞출 때
-
-```bash
-python3 $S/extract_docx.py manual.docx out/                  # 문서의 번호·라벨을 정답으로 읽기
-python3 $S/sync_docx.py manual.docx new.docx png/ map.json   # 렌더 결과를 문서에 반영
-```
-
-번호의 정답은 문서 쪽입니다. Word가 저장할 때마다 미디어 파일 이름을 바꾸기 때문에
-파일명 대신 **캡션 순서**로 대응시킵니다.
+위 유즈케이스 이미지는 전부 [`examples/`](examples/)에서 이 명령들로 만든 것입니다.
+`spec.json`과 `areas.txt`를 그대로 복사해 실행하면 재현됩니다.
 
 ---
 

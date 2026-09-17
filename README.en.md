@@ -9,10 +9,6 @@ Coordinates are measured from the pixels instead of guessed off a scaled preview
 leader lines are routed so they never cross, and everything is checked before it is
 drawn. **You get PNGs without Figma.**
 
-<p align="center">
-  <img src="examples/out/01-list.png" alt="A list screen with eight callouts applied" width="820">
-</p>
-
 ---
 
 ## Install
@@ -42,6 +38,103 @@ to match exactly, set `export CALLOUT_FONT=/path/to/Inter-SemiBold.ttf`.
 
 ---
 
+## Use cases
+
+### 1. Documenting a whole screen
+
+You pick the elements; the numbering follows position — left column top-down, then
+the right column. This is what you want for a screen-anatomy table.
+
+<img src="examples/out/01-list.png" alt="Eight callouts on one screen">
+
+### 2. Writing a procedure
+
+Only the things the sentences point at get a number.
+
+```
+Click Campaigns (markup) to open the campaign screen.
+Click New campaign (markup) to open the create dialog.
+Check Progress (markup).
+```
+
+Same screen: full markup finds eight, this finds three.
+Because the numbering has to follow the sentences, use `--keep-numbers`.
+
+<img src="examples/procedure/out/05-command.png" alt="Only the three elements the sentences point at">
+
+### 3. One procedure spanning several screens
+
+Numbering continues across images.
+
+```
+1. Click New campaign (image1-①) to open the create dialog.
+2. Enter a Campaign name (image2-②) and click Create (image2-③).
+3. Check that the new campaign (image3-④) was added to the list.
+```
+
+<table>
+<tr>
+<td><img src="examples/procedure/out/06-step1.png"></td>
+<td><img src="examples/procedure/out/07-step2.png"></td>
+<td><img src="examples/procedure/out/08-step3.png"></td>
+</tr>
+<tr>
+<td align="center">Image 1 — ①</td>
+<td align="center">Image 2 — ② ③</td>
+<td align="center">Image 3 — ④</td>
+</tr>
+</table>
+
+```
+STEP1|LIST |1,New campaign,905,69,55,28
+STEP2|MODAL|2,Name,352,223,336,28;3,Create,613,342,76,30
+STEP3|LIST |4,Added row,178,228,547,38
+```
+
+### 4. Documenting a dark UI
+
+A white halo is added only to the lines and boxes that cross a dark area, and nowhere
+else — so a screen that mixes light and dark regions needs no special handling.
+
+<img src="examples/out/03-dark.png" alt="Markup with halo on a dark UI">
+
+### 5. Documenting a dialog over a dimmed page
+
+The dim makes the dialog edge hard to find; `modal` mode picks out the dialog alone.
+Inputs inside it are `outline`, the filled button is `solid`.
+
+<img src="examples/out/02-dialog.png" alt="Markup on a dialog over dim">
+
+### 6. Pointing at something not on screen yet
+
+A save-confirmation toast only appears under the right conditions, so it is not in the
+screenshot. A dashed box says "it shows up here" — distinct from solid, so no confusion.
+
+<img src="examples/out/04-placeholder.png" alt="Dashed placeholder">
+
+### 7. Alongside Figma
+
+Steps 1–4 are identical; only the drawing goes to Figma. The coordinates and styling
+are the same, so the two outputs match — drawing the same frame both ways differed by
+0.8% of pixels, all of it font antialiasing.
+
+In Figma you can nudge shapes afterwards, and the markup survives a screenshot swap.
+Measure on the **export Figma rendered**, never the source image — `scaleMode: FILL`
+crops it and your coordinates drift. Snippets are in
+[`references/figma-plugin.md`](skills/screenshot-annotator/references/figma-plugin.md).
+
+### 8. Keeping a Word manual in sync
+
+```bash
+python3 $S/extract_docx.py manual.docx out/                  # read numbers/labels from the doc
+python3 $S/sync_docx.py manual.docx new.docx png/ map.json   # push renders into the doc
+```
+
+The document is the source of truth for numbering. Matching goes by **caption order**,
+not filename, because Word renames every media part each time it saves.
+
+---
+
 ## Coverage
 
 ### Elements it can fit
@@ -61,16 +154,16 @@ Give it a **rough box plus the element kind (MODE)** — it finds the exact rect
 
 ### Levels
 
-| Level | When | PNG | Figma |
+| Level | Where it shows up | PNG | Figma |
 |---|---|---|---|
-| **L1** Basic | Everything is visible on screen | O | O |
-| **L2** Dark-aware | Dark UI (white halo added automatically) | O | O |
-| **L3** Placeholder | A message that is not on screen yet | dashes O, mock via `extra.json` | O |
+| **L1** Basic | Use cases 1, 2, 3, 5 | O | O |
+| **L2** Dark-aware | Use case 4 | O | O |
+| **L3** Placeholder | Use case 6 | dashes O, mock via `extra.json` | O |
 | **L4** Zoom inset | Small controls inside a table | `zoom` in `extra.json` | O |
 | **L5** State catalog | One spot with several possible states | manual | O |
 | **L6** Before/after | Empty state next to a populated one | manual | O |
 
-### Usage
+### Running it
 
 Put one `img/HOME.png` in a working directory and run five steps.
 
@@ -94,78 +187,10 @@ python3 $S/build.py .                   # --keep-numbers to freeze the numbering
 python3 $S/render.py . --scale 2        # -> out/HOME.png
 ```
 
-Working examples of `spec.json` and `areas.txt` live in [`examples/`](examples/).
-Copy them as-is and they reproduce.
+If the image is not 1040×524, state the placement: `HOME|HOME@230,60,1040,585|...`
 
-<table>
-<tr>
-<td width="50%"><img src="examples/out/02-dialog.png"><br><b>Dialog over dim</b> — <code>modal</code> <code>outline</code></td>
-<td width="50%"><img src="examples/out/03-dark.png"><br><b>Dark UI</b> — halo only where the background is dark</td>
-</tr>
-<tr>
-<td><img src="examples/out/04-placeholder.png"><br><b>Placeholder</b> — a not-yet-visible message, dashed</td>
-<td><img src="examples/out/01-list.png"><br><b>List screen</b> — five modes in one frame</td>
-</tr>
-</table>
-
----
-
-## Use cases
-
-### Documenting a whole screen
-
-You pick the elements; numbering follows position automatically. This is what you
-want for a screen-anatomy table.
-
-### Writing a procedure
-
-Only the things the sentence points at get a number.
-
-```
-Click Campaigns (markup) to open the campaign screen.
-Click New campaign (markup) to open the create dialog.
-Check Progress (markup).
-```
-
-Three boxes on a screen that would have produced eight under full markup.
-Because the numbering has to follow the sentences, use `--keep-numbers`.
-
-### One procedure spanning several screens
-
-Numbering continues across images.
-
-```
-1. Click New campaign (image1-①) to open the create dialog.
-2. Enter a Campaign name (image2-②) and click Create (image2-③).
-3. Check that the new campaign (image3-④) was added to the list.
-```
-
-```
-STEP1|LIST |1,New campaign,905,69,55,28
-STEP2|MODAL|2,Name,352,223,336,28;3,Create,613,342,76,30
-STEP3|LIST |4,Added row,178,228,547,38
-```
-
-### Alongside Figma
-
-Steps 1–4 are identical; only the drawing goes to Figma. The coordinates and styling
-are the same, so the two outputs match — drawing the same frame both ways differed by
-0.8% of pixels, all of it font antialiasing.
-
-In Figma you can nudge shapes afterwards, and the markup survives a screenshot swap.
-Measure on the **export Figma rendered**, never the source image — `scaleMode: FILL`
-crops it and your coordinates drift. Snippets are in
-[`references/figma-plugin.md`](skills/screenshot-annotator/references/figma-plugin.md).
-
-### Keeping a Word manual in sync
-
-```bash
-python3 $S/extract_docx.py manual.docx out/                  # read numbers/labels from the doc
-python3 $S/sync_docx.py manual.docx new.docx png/ map.json   # push renders into the doc
-```
-
-The document is the source of truth for numbering. Matching goes by **caption order**,
-not filename, because Word renames every media part each time it saves.
+Every image above was produced by these commands in [`examples/`](examples/).
+Copy the `spec.json` and `areas.txt` as-is and they reproduce.
 
 ---
 
