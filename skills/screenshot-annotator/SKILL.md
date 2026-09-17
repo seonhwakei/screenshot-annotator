@@ -2,7 +2,6 @@
 name: screenshot-annotator
 description: Annotate screenshots for documentation — draw region outlines, leader lines and numbered callout badges, with coordinates measured from pixels, leader lines routed without overlap, and everything verified before drawing. Outputs PNG (no Figma needed) or draws into Figma. 한국어 트리거 — "스크린샷에 번호 달아줘", "마크업 적용", "콜아웃 추가", "박스 위치 보정", "절차 이미지 만들어줘", "확대 도해", "상태 카탈로그", "표시 자리 점선". Not for general image editing or design generation.
 version: 1.0.0
-license: MIT
 allowed-tools:
   - Bash
   - Read
