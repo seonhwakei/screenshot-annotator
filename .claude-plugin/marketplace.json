@@ -1,0 +1,33 @@
+{
+  "name": "screenshot-annotator",
+  "owner": {
+    "name": "seonhwakei"
+  },
+  "metadata": {
+    "description": "Annotate screenshots for documentation: region outlines, leader lines and numbered callout badges. Measures coordinates from pixels, routes leader lines without overlap, verifies before drawing. PNG output or Figma.",
+    "version": "1.0.0",
+    "pluginRoot": "."
+  },
+  "plugins": [
+    {
+      "name": "screenshot-annotator",
+      "source": "./",
+      "description": "Annotate screenshots for documentation: region outlines, leader lines and numbered callout badges. Measures coordinates from pixels, routes leader lines without overlap, verifies before drawing. PNG output or Figma.",
+      "version": "1.0.0",
+      "keywords": [
+        "screenshot",
+        "annotation",
+        "annotate",
+        "callout",
+        "numbered-callouts",
+        "documentation",
+        "user-manual",
+        "technical-writing",
+        "figma",
+        "스크린샷",
+        "마크업",
+        "매뉴얼"
+      ]
+    }
+  ]
+}

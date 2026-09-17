@@ -1,0 +1,24 @@
+# examples
+
+`img/`의 스크린샷에 이 저장소의 스크립트를 그대로 돌려 `out/`을 만들었다.
+스크린샷은 실제 제품이 아니라 이 저장소를 위해 합성한 가상 콘솔 화면이다.
+
+재현:
+
+```bash
+export S=../skills/screenshot-annotator/scripts
+python3 $S/verify.py spec.json     # 그리기 전 검증  -> 0 findings
+python3 $S/route.py .              # 리더선 배선     -> cross=0 ovl=0 ink=0
+python3 $S/build.py .              # 번호 부여 + halo 판정
+python3 $S/render.py . --scale 2   # out/*.png
+```
+
+| 파일 | 수준 | 보여 주는 것 |
+|---|---|---|
+| `01-list.png` | L1 | 목록 화면. `nav` `card` `row` `ink` `solid` 모드가 한 화면에 |
+| `02-dialog.png` | L1 | 딤 위의 창. `modal` `outline` 모드 |
+| `03-dark.png` | L2 | 다크 UI. 어두운 구간에만 흰 halo가 자동으로 붙는다 |
+| `04-placeholder.png` | L3 | 아직 화면에 없는 안내 문구를 점선 "표시 자리"로 |
+
+번호는 **왼쪽 열 위→아래, 그다음 오른쪽 열 위→아래**로 자동 부여된다
+(`build.py`가 출력하는 `renumbered` 맵 참고).

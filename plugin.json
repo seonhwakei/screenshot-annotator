@@ -1,0 +1,28 @@
+{
+  "name": "screenshot-annotator",
+  "version": "1.0.0",
+  "description": "Annotate screenshots for documentation: region outlines, leader lines and numbered callout badges. Measures coordinates from pixels, routes leader lines without overlap, verifies before drawing. PNG output or Figma.",
+  "author": {
+    "name": "seonhwakei"
+  },
+  "homepage": "https://github.com/seonhwakei/screenshot-annotator",
+  "repository": "https://github.com/seonhwakei/screenshot-annotator",
+  "license": "MIT",
+  "keywords": [
+    "screenshot",
+    "annotation",
+    "annotate",
+    "callout",
+    "numbered-callouts",
+    "documentation",
+    "user-manual",
+    "technical-writing",
+    "figma",
+    "스크린샷",
+    "마크업",
+    "매뉴얼"
+  ],
+  "skills": [
+    "./skills/"
+  ]
+}
